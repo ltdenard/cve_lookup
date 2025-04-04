@@ -33,6 +33,12 @@ Make sure you have the following installed:
   git lfs install
   git lfs track <filename over 100mb>
   ```
+- ✅ Setup Environment Variable `NIST_API_KEY` with your API key
+  ```
+  source .env
+  # OR
+  export NIST_API_KEY="<api key here>"
+  ```
 
 ---
 
