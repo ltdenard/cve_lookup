@@ -5,9 +5,12 @@ import json
 import time
 import zipfile
 import argparse
-import requests
 import datetime
 from pathlib import Path
+try:
+    import requests
+except:
+    print(f"requests module isn't installed. It is needed for updates.")
 
 class CVELookup:
     def __init__(self, reinitialize=False, base_dir=None):
