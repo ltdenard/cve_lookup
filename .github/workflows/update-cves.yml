@@ -30,6 +30,8 @@ jobs:
     - name: Run update script
       run: |
         source env/bin/activate
+        pwd
+        ls -lha
         python update_jsonv2.py
 
     - name: Commit and push updated CVE data
