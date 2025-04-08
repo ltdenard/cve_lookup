@@ -32,7 +32,7 @@ class CVELookup:
         self.date_chunk = 120  # NVD API limit: 120-day max range
         self.cve_json = {}
         self.reinitialize = reinitialize
-        self.max_file_size = 90 * 1024 * 1024 # 90 MB
+        self.max_file_size = 49 * 1024 * 1024 # 90 MB
 
     def fetch_cves_in_range(self, start_date, end_date, start_index=0, accumulated=None, modified_date_search=False):
         if accumulated is None:
