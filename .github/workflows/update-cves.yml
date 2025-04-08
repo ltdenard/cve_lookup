@@ -10,11 +10,10 @@ jobs:
     runs-on: self-hosted
 
     steps:
-    - name: Install Git LFS
+    - name: Install updates
       run: |
         sudo apt-get update
-        sudo apt-get install git-lfs
-        git lfs install
+        sudo apt-get -y dist-upgrade
 
     - name: Checkout repo
       uses: actions/checkout@v3
@@ -41,7 +40,7 @@ jobs:
         source env/bin/activate
         pwd
         ls -lha
-        python update_jsonv2.py
+        python update_json.py
 
     - name: Commit and push updated CVE data
       run: |
