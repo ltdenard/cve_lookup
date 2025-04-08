@@ -1,0 +1,59 @@
+name: Update CVE Data
+
+on:
+  schedule:
+    - cron: '0 10 * * *'  # Every day at 10 AM UTC / 5 AM EST
+  workflow_dispatch:     # Allow manual trigger
+
+jobs:
+  update-cves:
+    runs-on: self-hosted
+
+    steps:
+    - name: Install Git LFS
+      run: |
+        sudo apt-get update
+        sudo apt-get install git-lfs
+        git lfs install
+
+    - name: Checkout repo
+      uses: actions/checkout@v3
+      with:
+        lfs: true
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        python -m venv env
+        source env/bin/activate
+        pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Load secrets into environment
+      run: echo "NIST_API_KEY=${{ secrets.NIST_API_KEY }}" >> $GITHUB_ENV
+
+    - name: Run update script
+      run: |
+        source env/bin/activate
+        pwd
+        ls -lha
+        python update_jsonv2.py
+
+    - name: Commit and push updated CVE data
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git add all_cves.json
+        git add last_update.txt
+        if git diff --cached --quiet; then
+          echo "No changes to commit"
+        else
+          git commit -m "Auto-update CVE data"
+          git push -u origin main
+        fi
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
