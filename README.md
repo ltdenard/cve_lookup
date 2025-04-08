@@ -25,14 +25,8 @@ This tool provides both **legacy** and **modern** methods for collecting CVE dat
 
 Make sure you have the following installed:
 
-- ✅ Python 3.7 or higher
+- ✅ Python 3.12 or higher
 - ✅ Git
-- ✅ Git Large File Storage
-  ```
-  brew install git-lfs
-  git lfs install
-  git lfs track <filename over 100mb>
-  ```
 - ✅ Setup Environment Variable `NIST_API_KEY` with your API key
   ```
   source .env
