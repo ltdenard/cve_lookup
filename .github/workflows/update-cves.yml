@@ -7,7 +7,7 @@ on:
 
 jobs:
   update-cves:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
 
     steps:
     - name: Install updates
