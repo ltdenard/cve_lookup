@@ -1,0 +1,73 @@
+stages:
+  - update
+
+workflow:
+  rules:
+    # Create pipelines for scheduled runs
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+
+update_cves:
+  stage: update
+  variables:
+    GIT_STRATEGY: clone
+    GIT_DEPTH: "0"
+    GIT_LFS_SKIP_SMUDGE: "0"   # ensure LFS files are pulled
+    PIP_DISABLE_PIP_VERSION_CHECK: "1"
+    PIP_NO_CACHE_DIR: "1"
+
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+
+  before_script:
+    # Install system packages (git + git-lfs) and update package indexes
+    - apt-get update
+    - apt-get install -y --no-install-recommends git git-lfs ca-certificates
+
+    # Ensure LFS is enabled for this checkout
+    - git lfs install
+    - git lfs pull
+
+    # Configure Git identity for commits
+    - git config user.name "ltdenard"
+    - git config user.email "ltdenard@gmail.com"
+
+    # (Optional) mimic "dist-upgrade" step from the GitHub runner
+    # In containers this is generally unnecessary; keep only if you truly need it.
+    # - apt-get -y dist-upgrade
+
+  script:
+    # Create venv + install deps
+    - python -m venv env
+    - . env/bin/activate
+    - python -m pip install --upgrade pip
+    - pip install -r requirements.txt
+
+    # Ensure secret is present
+    - test -n "${NIST_API_KEY}" || (echo "NIST_API_KEY is not set" && exit 1)
+
+    # Run update
+    - pwd
+    - ls -lha
+    - python update_json.py
+
+    # Stage + commit changes if any
+    - git add cves_json/*.json last_update.txt || true
+    - |
+      if git diff --cached --quiet; then
+        echo "No changes to commit"
+        exit 0
+      fi
+      git commit -m "Auto-update CVE data [skip ci]"
+
+    # Push back to main using a token (see section 2)
+    - |
+      git remote set-url origin \
+        "https://gitlab-ci-token:${GITLAB_PUSH_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git"
+      git push origin "HEAD:main"
+
+  # Prevent two scheduled pipelines from colliding and creating push races
+  resource_group: update-cves
