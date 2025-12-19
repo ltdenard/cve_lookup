@@ -25,7 +25,7 @@ update_cves:
   before_script:
     # Install system packages (git + git-lfs) and update package indexes
     - apt-get update
-    - apt-get install -y --no-install-recommends git git-lfs ca-certificates
+    - apt-get install -y --no-install-recommends git git-lfs ca-certificates python3-venv
 
     # Ensure LFS is enabled for this checkout
     - git lfs install
@@ -41,9 +41,9 @@ update_cves:
 
   script:
     # Create venv + install deps
-    - python -m venv env
-    - . env/bin/activate
-    - python -m pip install --upgrade pip
+    - python3 -m venv env
+    - ./env/bin/activate
+    - python3 -m pip install --upgrade pip
     - pip install -r requirements.txt
 
     # Ensure secret is present
@@ -52,7 +52,7 @@ update_cves:
     # Run update
     - pwd
     - ls -lha
-    - python update_json.py
+    - python3 update_json.py
 
     # Stage + commit changes if any
     - git add cves_json/*.json last_update.txt || true
